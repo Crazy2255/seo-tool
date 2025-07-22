@@ -9,27 +9,13 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LeadMagnetController;
 use App\Http\Controllers\LeadController;
-use App\Http\Controllers\DebugJsonController;
 
 // Authentication Routes
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
-Route::get('/register-debug', function() { 
-    return view('auth.register-debug'); 
-})->name('register.debug');
-
-// Test CSRF route
-Route::post('/test-csrf', function(Illuminate\Http\Request $request) {
-    return response()->json(['success' => true, 'message' => 'CSRF test passed', 'data' => $request->all()]);
-})->name('test.csrf');
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-// Debug route
-Route::get('/debug-auth', function() {
-    return view('debug_auth');
-})->name('debug.auth');
 
 // Password Reset Routes
 Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
@@ -157,88 +143,3 @@ Route::middleware('auth')->group(function () {
 
 // Image ALT Text Checker API routes (public for demo mode)
 Route::post('/api/image-alt/analyze', [App\Http\Controllers\ImageAltController::class, 'analyze']);
-
-// Test JSON response routes (for debugging)
-Route::get('/test/json', [App\Http\Controllers\TestController::class, 'testJson']);
-Route::match(['GET', 'POST'], '/test/bulk-invite', [App\Http\Controllers\TestController::class, 'testBulkInvite']);
-Route::post('/test/actual-bulk-invite', [App\Http\Controllers\TestController::class, 'testActualBulkInvite']);
-Route::get('/test/upload', function () {
-    return view('test-upload');
-});
-Route::get('/test-bulk-invite-page', function () {
-    return view('test-bulk-invite');
-});
-Route::get('/bulk-invite-fixed', function () {
-    return view('bulk-invite-test-fixed');
-});
-Route::get('/test/email', [App\Http\Controllers\TestController::class, 'testEmailSending']);
-Route::get('/working-bulk-test', function () {
-    return view('working-bulk-test');
-});
-
-// Debug JSON routes
-Route::prefix('debug-json')->group(function () {
-    Route::get('/competitor-analysis', [DebugJsonController::class, 'competitorAnalysis'])->name('debug.json.competitor-analysis');
-    Route::get('/site-audit', [DebugJsonController::class, 'siteAudit'])->name('debug.json.site-audit');
-    Route::get('/meta-analyzer', [DebugJsonController::class, 'metaAnalyzer'])->name('debug.json.meta-analyzer');
-    Route::get('/page-speed', [DebugJsonController::class, 'pageSpeed'])->name('debug.json.page-speed');
-    Route::get('/image-alt', [DebugJsonController::class, 'imageAlt'])->name('debug.json.image-alt');
-    Route::get('/lead-magnets', [DebugJsonController::class, 'leadMagnets'])->name('debug.json.lead-magnets');
-});
-
-// Debug JSON clean output routes
-Route::get('/debug/clean-json', [DebugJsonController::class, 'testCleanJson']);
-Route::get('/debug/dirty-json', [DebugJsonController::class, 'testWithOutput']);
-Route::get('/debug/raw-json', [DebugJsonController::class, 'testRawJson']);
-Route::match(['GET', 'POST'], '/debug/bulk-simulation', [DebugJsonController::class, 'testBulkInviteSimulation']);
-
-// Test email sending (simple version)
-Route::get('/test/email', function () {
-    try {
-        // Test basic mail configuration
-        Mail::raw('This is a test email from your Laravel application.', function ($message) {
-            $message->to('test@example.com')
-                    ->subject('Test Email from Laravel');
-        });
-        
-        return response()->json(['success' => 'Test email sent successfully!']);
-    } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()]);
-    }
-})->name('test.email');
-
-// Test download functionality
-Route::get('/test/download', function () {
-    try {
-        $leadMagnets = App\Models\LeadMagnet::all();
-        $leads = App\Models\Lead::all();
-        
-        if ($leadMagnets->isEmpty()) {
-            return response()->json(['error' => 'No lead magnets found']);
-        }
-        
-        $leadMagnet = $leadMagnets->first();
-        
-        if ($leads->isEmpty()) {
-            return response()->json(['error' => 'No leads found']);
-        }
-        
-        $lead = $leads->first();
-        
-        // Generate download token
-        $data = $lead->id . '|' . $lead->email . '|' . $lead->created_at->timestamp;
-        $token = base64_encode($data . '|' . hash('sha256', $data . config('app.key')));
-        
-        $downloadUrl = route('lead.download', ['slug' => $leadMagnet->slug, 'token' => $token]);
-        
-        return response()->json([
-            'lead_magnet' => $leadMagnet->only(['id', 'title', 'slug', 'file_path', 'file_name']),
-            'lead' => $lead->only(['id', 'email']),
-            'download_url' => $downloadUrl,
-            'file_exists' => Storage::disk('public')->exists($leadMagnet->file_path)
-        ]);
-        
-    } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()]);
-    }
-})->name('test.download');
