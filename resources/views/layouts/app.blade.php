@@ -22,6 +22,9 @@
     
     <!-- Alpine.js -->
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
     
     <script>
         tailwind.config = {
@@ -212,16 +215,16 @@
                                 <span class="ml-3 text-sm font-medium">Keyword Tracker</span>
                             </div>
                         </a>
-                        
-                        <!-- <a href="{{ route('tools.backlink-checker') }}" class="nav-link group {{ request()->routeIs('tools.backlink-checker') ? 'active' : '' }}">
+
+                        <!-- <a href="{{ route('tools.web-builder') }}" class="nav-link group {{ request()->routeIs('tools.web-builder') ? 'active' : '' }}">
                             <div class="flex items-center">
-                                <div class="flex items-center justify-center w-8 h-8 rounded-lg {{ request()->routeIs('tools.backlink-checker') ? 'bg-primary-100 text-primary-600' : 'text-gray-400 group-hover:bg-gray-100 group-hover:text-gray-600' }} transition-all duration-200">
+                                <div class="flex items-center justify-center w-8 h-8 rounded-lg {{ request()->routeIs('tools.web-builder') ? 'bg-primary-100 text-primary-600' : 'text-gray-400 group-hover:bg-gray-100 group-hover:text-gray-600' }} transition-all duration-200">
                                     <i class="fas fa-link text-sm"></i>
                                 </div>
-                                <span class="ml-3 text-sm font-medium">Backlink Checker</span>
+                                <span class="ml-3 text-sm font-medium">Web Builder</span>
                             </div>
-                        </a>
-                         -->
+                        </a> -->
+                        
                         <a href="{{ route('tools.page-speed') }}" class="nav-link group {{ request()->routeIs('tools.page-speed') ? 'active' : '' }}">
                             <div class="flex items-center">
                                 <div class="flex items-center justify-center w-8 h-8 rounded-lg {{ request()->routeIs('tools.page-speed') ? 'bg-primary-100 text-primary-600' : 'text-gray-400 group-hover:bg-gray-100 group-hover:text-gray-600' }} transition-all duration-200">
@@ -293,6 +296,60 @@
                                     <i class="fas fa-chess text-sm"></i>
                                 </div>
                                 <span class="ml-3 text-sm font-medium">Competitor Analysis</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Landing Pages Section -->
+                <div class="mt-8">
+                    <div class="mb-3">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2">Landing Pages</p>
+                    </div>
+                    
+                    <div class="space-y-1">
+                        <a href="{{ route('landing-pages.index') }}" class="nav-link group {{ request()->routeIs('landing-pages.*') ? 'active' : '' }}">
+                            <div class="flex items-center">
+                                <div class="flex items-center justify-center w-8 h-8 rounded-lg {{ request()->routeIs('landing-pages.*') ? 'bg-primary-100 text-primary-600' : 'text-gray-400 group-hover:bg-gray-100 group-hover:text-gray-600' }} transition-all duration-200">
+                                    <i class="fas fa-pager text-sm"></i>
+                                </div>
+                                <span class="ml-3 text-sm font-medium">Page Builder</span>
+                            </div>
+                        </a>
+                        
+                        <a href="{{ route('analytics.dashboard') }}" class="nav-link group {{ request()->routeIs('analytics.*') ? 'active' : '' }}">
+                            <div class="flex items-center">
+                                <div class="flex items-center justify-center w-8 h-8 rounded-lg {{ request()->routeIs('analytics.*') ? 'bg-primary-100 text-primary-600' : 'text-gray-400 group-hover:bg-gray-100 group-hover:text-gray-600' }} transition-all duration-200">
+                                    <i class="fas fa-chart-line text-sm"></i>
+                                </div>
+                                <span class="ml-3 text-sm font-medium">Analytics</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Business Promotions Section -->
+                <div class="mt-8">
+                    <div class="mb-3">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2">Marketing</p>
+                    </div>
+                    
+                    <div class="space-y-1">
+                        <a href="{{ route('business-promotions.index') }}" class="nav-link group {{ request()->routeIs('business-promotions.*') ? 'active' : '' }}">
+                            <div class="flex items-center">
+                                <div class="flex items-center justify-center w-8 h-8 rounded-lg {{ request()->routeIs('business-promotions.*') ? 'bg-primary-100 text-primary-600' : 'text-gray-400 group-hover:bg-gray-100 group-hover:text-gray-600' }} transition-all duration-200">
+                                    <i class="fas fa-bullhorn text-sm"></i>
+                                </div>
+                                <span class="ml-3 text-sm font-medium">Promotions</span>
+                            </div>
+                        </a>
+                        
+                        <a href="{{ route('campaigns.index') }}" class="nav-link group {{ request()->routeIs('campaigns.*') ? 'active' : '' }}">
+                            <div class="flex items-center">
+                                <div class="flex items-center justify-center w-8 h-8 rounded-lg {{ request()->routeIs('campaigns.*') ? 'bg-primary-100 text-primary-600' : 'text-gray-400 group-hover:bg-gray-100 group-hover:text-gray-600' }} transition-all duration-200">
+                                    <i class="fas fa-share-alt text-sm"></i>
+                                </div>
+                                <span class="ml-3 text-sm font-medium">Campaigns</span>
                             </div>
                         </a>
                     </div>

@@ -35,6 +35,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard
 
 // SEO Tools Routes
 Route::prefix('tools')->group(function () {
+    Route::get('/', [App\Http\Controllers\ToolsController::class, 'dashboard'])->name('tools.dashboard');
     Route::get('/site-audit', [App\Http\Controllers\SiteAuditController::class, 'index'])->name('tools.site-audit');
     Route::get('/keyword-tracker', [DashboardController::class, 'keywordTracker'])->name('tools.keyword-tracker');
     Route::get('/backlink-checker', [DashboardController::class, 'backlinkChecker'])->name('tools.backlink-checker');
@@ -44,6 +45,9 @@ Route::prefix('tools')->group(function () {
     Route::get('/image-alt-checker', [App\Http\Controllers\ImageAltController::class, 'index'])->name('tools.image-alt-checker');
     Route::get('/lead-magnet-builder', [LeadMagnetController::class, 'index'])->name('tools.lead-magnet-builder');
     Route::get('/sitemap-checker', [DashboardController::class, 'sitemapChecker'])->name('tools.sitemap-checker');
+    Route::get('/web-builder', [DashboardController::class, 'webBuilder'])->name('tools.web-builder');
+    // Add a route with underscore for backward compatibility
+    Route::get('/web_builder', function() { return view('tools.redirect'); })->name('tools.web_builder');
     Route::get('/reports', [DashboardController::class, 'reports'])->name('tools.reports');
 });
 
@@ -141,5 +145,106 @@ Route::middleware('auth')->group(function () {
     Route::put('/api/lead-magnets/{leadMagnet}', [LeadMagnetController::class, 'update']);
 });
 
+// Landing Page Builder Routes
+Route::middleware(['auth'])->group(function () {
+    // Quick Access for Testing
+    Route::get('/quick-access', function() {
+        return view('quick-access');
+    })->name('quick-access');
+    
+    // Landing Pages CRUD
+    Route::resource('landing-pages', App\Http\Controllers\LandingPageController::class);
+    Route::post('landing-pages/{landingPage}/duplicate', [App\Http\Controllers\LandingPageController::class, 'duplicate'])->name('landing-pages.duplicate');
+    Route::get('landing-pages/{landingPage}/preview', [App\Http\Controllers\LandingPageController::class, 'preview'])->name('landing-pages.preview');
+    Route::get('landing-pages/{landingPage}/analytics', [App\Http\Controllers\LandingPageController::class, 'analytics'])->name('landing-pages.analytics');
+    
+    // Page Builder Routes
+    Route::get('landing-pages/{landingPage}/builder', [App\Http\Controllers\LandingPageBuilderController::class, 'builder'])->name('landing-pages.builder');
+    Route::get('landing-pages/{landingPage}/web-builder', [App\Http\Controllers\LandingPageBuilderController::class, 'webBuilder'])->name('landing-pages.web-builder')->middleware('auth');
+    Route::post('landing-pages/{landingPage}/save-content', [App\Http\Controllers\LandingPageBuilderController::class, 'saveContent'])->name('landing-pages.save-content');
+    Route::post('landing-pages/upload-image', [App\Http\Controllers\LandingPageBuilderController::class, 'uploadImage'])->name('landing-pages.upload-image');
+    Route::get('templates/{template}', [App\Http\Controllers\LandingPageBuilderController::class, 'getTemplate'])->name('templates.get');
+    Route::post('landing-pages/{landingPage}/apply-template', [App\Http\Controllers\LandingPageBuilderController::class, 'applyTemplate'])->name('landing-pages.apply-template');
+    Route::get('landing-pages/{landingPage}/export-html', [App\Http\Controllers\LandingPageBuilderController::class, 'exportHtml'])->name('landing-pages.export-html');
+    Route::post('landing-pages/{landingPage}/submit-form', [App\Http\Controllers\LandingPageBuilderController::class, 'submitForm'])->name('landing-pages.submit-form');
+    
+    // Business Promotions CRUD
+    Route::resource('business-promotions', App\Http\Controllers\BusinessPromotionController::class);
+    Route::post('business-promotions/{businessPromotion}/activate', [App\Http\Controllers\BusinessPromotionController::class, 'activate'])->name('business-promotions.activate');
+    Route::post('business-promotions/{businessPromotion}/pause', [App\Http\Controllers\BusinessPromotionController::class, 'pause'])->name('business-promotions.pause');
+    Route::get('business-promotions/{businessPromotion}/analytics', [App\Http\Controllers\BusinessPromotionController::class, 'analytics'])->name('business-promotions.analytics');
+    Route::post('business-promotions/{businessPromotion}/update-metrics', [App\Http\Controllers\BusinessPromotionController::class, 'updateMetrics'])->name('business-promotions.update-metrics');
+    
+    // Campaign Routes
+    Route::resource('campaigns', App\Http\Controllers\CampaignController::class);
+    Route::post('campaigns/{campaign}/activate', [App\Http\Controllers\CampaignController::class, 'activate'])->name('campaigns.activate');
+    Route::post('campaigns/{campaign}/pause', [App\Http\Controllers\CampaignController::class, 'pause'])->name('campaigns.pause');
+    Route::get('campaigns/{campaign}/analytics', [App\Http\Controllers\CampaignController::class, 'analytics'])->name('campaigns.analytics');
+    Route::post('campaigns/{campaign}/bulk-emails', [App\Http\Controllers\CampaignController::class, 'sendBulkEmails'])->name('campaigns.bulk-emails');
+    
+    // Public Campaign Routes
+    Route::get('campaign/{shareLink}', [App\Http\Controllers\CampaignController::class, 'landing'])->name('campaigns.landing');
+    Route::post('campaign/{shareLink}/lead', [App\Http\Controllers\CampaignController::class, 'storeLead'])->name('campaigns.store-lead');
+    Route::get('campaign/{shareLink}/thank-you', [App\Http\Controllers\CampaignController::class, 'thankYou'])->name('campaigns.thank-you');
+    Route::get('campaign/{shareLink}/track', [App\Http\Controllers\CampaignController::class, 'track'])->name('campaigns.track');
+    
+    // Analytics Routes
+    Route::get('analytics/dashboard', [App\Http\Controllers\ClientTrackingController::class, 'dashboard'])->name('analytics.dashboard');
+    Route::get('analytics/page/{landingPage}', [App\Http\Controllers\ClientTrackingController::class, 'pageAnalytics'])->name('analytics.page');
+    Route::get('analytics/export', [App\Http\Controllers\ClientTrackingController::class, 'exportData'])->name('analytics.export');
+    Route::get('analytics/real-time', [App\Http\Controllers\ClientTrackingController::class, 'realTimeStats'])->name('analytics.real-time');
+});
+
+// Test login route (remove in production)
+Route::get('/test-login', function () {
+    $user = App\Models\User::first();
+    if ($user) {
+        Auth::login($user);
+        return redirect('/landing-pages/maison/builder');
+    }
+    return 'No users found';
+});
+
+// Debug Routes
+Route::get('/debug/landing-pages', [App\Http\Controllers\DashboardController::class, 'landingPagesDebug'])->name('debug.landing-pages');
+Route::get('/debug/web-builder', [App\Http\Controllers\DashboardController::class, 'webBuilderDebug'])->name('debug.web-builder');
+Route::get('/debug/route-test/{landingPage}', function(App\Models\LandingPage $landingPage) {
+    return view('debug.route-test', compact('landingPage'));
+})->name('debug.route-test');
+
+// Simple Web Builder Routes
+Route::get('/landing-pages/{landingPage}/simple-builder', [App\Http\Controllers\SimpleWebBuilderController::class, 'edit'])->name('simple.builder.edit');
+Route::post('/landing-pages/{landingPage}/simple-builder', [App\Http\Controllers\SimpleWebBuilderController::class, 'save'])->name('simple.builder.save');
+Route::get('/landing-pages/{landingPage}/simple-preview', [App\Http\Controllers\SimpleWebBuilderController::class, 'preview'])->name('simple.builder.preview');
+
+// Drag & Drop Web Builder Routes 
+// Using full namespaces to avoid any issues with class resolution
+Route::get('/tools/drag-drop-builder', ['uses' => 'App\Http\Controllers\WebBuilderController@index'])->name('tools.drag-drop-builder');
+Route::get('/landing-pages/{landingPage}/drag-drop-builder', ['uses' => 'App\Http\Controllers\WebBuilderController@edit'])->name('landing-pages.drag-drop-builder');
+Route::get('/landing-pages/{landingPage}/builder/edit', ['uses' => 'App\Http\Controllers\WebBuilderController@edit'])->name('landing-pages.builder.edit');
+// Alternative save endpoint to bypass potential routing issues
+Route::post('/save-landing-page/{id}', [App\Http\Controllers\LandingPageSaveController::class, 'save'])->name('landing-pages.save-alternative');
+
+// Public Landing Page Routes (no auth required)
+Route::get('lp/{slug}', [App\Http\Controllers\LandingPageController::class, 'publicView'])->name('landing-page.show');
+Route::post('lp/{slug}/submit', [App\Http\Controllers\LandingPageController::class, 'submitForm'])->name('landing-page.submit');
+
+// Tracking API (no auth required)
+Route::post('api/track', [App\Http\Controllers\ClientTrackingController::class, 'track'])->name('api.track');
+
 // Image ALT Text Checker API routes (public for demo mode)
 Route::post('/api/image-alt/analyze', [App\Http\Controllers\ImageAltController::class, 'analyze']);
+
+// Route testing
+Route::get('/test-routes', [App\Http\Controllers\RouteTestController::class, 'testRoutes'])->name('test.routes');
+
+// CSRF Testing Routes
+Route::get('/csrf-test', [App\Http\Controllers\CsrfTestController::class, 'showTest'])->name('csrf.test');
+Route::post('/test-csrf', [App\Http\Controllers\CsrfTestController::class, 'processTest']);
+
+// Debug Routes
+Route::get('/debug/routes', [App\Http\Controllers\DebugController::class, 'checkRoutes'])->name('debug.routes');
+Route::post('/debug/test-save/{id?}', [App\Http\Controllers\DebugController::class, 'testSave'])->name('debug.test-save');
+
+// Landing Page Debug Routes
+Route::post('/debug/create-landing-page', [App\Http\Controllers\LandingPageDebugController::class, 'debugCreate'])->name('debug.landing-page.create');
